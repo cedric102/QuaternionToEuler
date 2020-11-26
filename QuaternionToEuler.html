@@ -1,0 +1,206 @@
+<!-- https://www.therogerlab.com/how-can-i/javascript/read-a-csv.html#readCSV 
+     https://stackoverflow.com/questions/2075337/uncaught-referenceerror-is-not-defined
+     https://gist.github.com/tanvir002700/c65f5c6608c16540a72688f011cf2485
+     https://www.w3schools.com/php/php_file_upload.asp
+-->
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<script src="https://www.chartjs.org/dist/2.9.4/Chart.min.js"></script>
+<script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+
+<html>
+<head>
+	<style>
+	canvas{
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+	}
+	</style>
+</head>
+<body>
+	<div style="width:50%;">
+		<canvas id="canvas"></canvas>
+	</div>
+<!--	<button id="randomizeData">Randomize Data</button>	-->
+	<input type="file" name="filename" id="filename">
+	<button id="upload">upload</button>
+	<div style="background-color: grey;" id="csv"></div>
+
+	<script>
+		//this is the 1st way.
+
+		var datapoints1 = [ 1 , 100 , 50 ];
+		var datapoints2 = [ 2 , 50 , -30 ];
+		var datapoints3 = [ 3 , -20 , 50 ];
+		
+		var labelString = [ 0 , 1 , 2 ];
+
+		$(document).ready(function(){
+			$('#upload').click(function(){
+				while (datapoints1.length) { datapoints1.pop(); }
+				while (datapoints2.length) { datapoints2.pop(); }
+				while (datapoints3.length) { datapoints3.pop(); }
+				var csv = $('#filename');
+				var csvFile = csv[0].files[0];
+				var ext = csv.val().split(".").pop().toLowerCase();
+
+				if($.inArray(ext, ["csv"]) === -1){
+					alert('upload csv');
+					return false;
+				}
+				if(csvFile != undefined){
+					reader = new FileReader();
+					reader.readAsText(csvFile);
+					reader.onload = function(e){
+						document.getElementById("csv").innerHTML = "<b>| => EULER CSV FORMAT :</b> <br>";
+						csvResult = e.target.result;
+						var rows = csvResult.split('\n');
+    						//move line by line
+						console.log( rows );
+    						for (var i = 0; i < rows.length-1; i++) {
+      							//split by separator (,) and get the columns
+      							cols = rows[i].split(',');
+							console.log( cols );
+							for (var j = 0; j < cols.length; j++) {
+	 							/*the value of the current column.       								Do whatever you want with the value*/
+								console.log( cols[j] );
+							}
+//							document.getElementById("csv").innerHTML = document.getElementById("csv").innerHTML + "<br>" +  cols;
+
+							qw = cols[0];
+							qx = cols[1];
+							qy = cols[2];
+							qz = cols[3];
+
+
+							heading = Math.atan( ( 2*qy*qw-2*qx*qz ) / ( 1 - 2*qy*qy - 2*qz*qz ) );
+
+							test = qx*qy + qz*qw;
+
+							attitude = Math.asin(2*test);
+							bank = Math.atan( ( 2*qx*qw-2*qy*qz ) / ( 1 - 2*qx*qx - 2*qz*qz ) );
+
+
+							if (test > 0.499) { // singularity at north pole
+								heading = 2 * Math.atan(qx/qw);
+								attitude = 3.14/2;
+								bank = 0;
+							}
+							if (test < -0.499) { // singularity at south pole
+								heading = -2 * Math.atan(qx/qw);
+								attitude = - 3.14/2;
+								bank = 0;
+							}
+							console.log( qw + " , " + qx + " , " + qy + " , " + qz );
+							heading=heading*360/6.28;
+							attitude=attitude*360/6.28;
+							bank=bank*360/6.28
+							console.log( heading + " , " + attitude + " , " + bank );
+
+							document.getElementById("csv").innerHTML = document.getElementById("csv").innerHTML +  heading + " , " + attitude + " , " + bank + " , <br>";
+							datapoints1.push(heading);
+							datapoints2.push(attitude);
+							datapoints3.push(bank);
+							console.log(datapoints1);
+							console.log(datapoints2);
+							console.log(datapoints3);
+						}
+						while (labelString.length) { labelString.pop(); }
+						if( datapoints1.length < 2 ) {
+							datapoints1.push(datapoints1[datapoints1.length-1]);
+							datapoints2.push(datapoints2[datapoints2.length-1]);
+							datapoints3.push(datapoints3[datapoints3.length-1]);
+							labelString.push(0);
+							labelString.push(1);
+						} else
+							for(var stringLoop = 0 ; stringLoop < datapoints1.length ; stringLoop++ )
+								labelString.push(stringLoop);
+	
+						console.log(labelString);
+						window.myLine.update();
+					}
+				}
+
+			});
+		});
+
+		console.log( datapoints1 );
+
+		var config = {
+			type: 'line',
+			data: {
+				labels: labelString ,
+				datasets: [{
+					label: 'X',
+					data: datapoints1,
+					borderColor: window.chartColors.red,
+					backgroundColor: 'rgba(0, 0, 0, 0)',
+					fill: false,
+					cubicInterpolationMode: 'monotone'
+				}, {
+					label: 'Y',
+					data: datapoints2,
+					borderColor: window.chartColors.blue,
+					backgroundColor: 'rgba(0, 0, 0, 0)',
+					fill: false,
+				}, {
+					label: 'Z',
+					data: datapoints3,
+					borderColor: window.chartColors.green,
+					backgroundColor: 'rgba(0, 0, 0, 0)',
+					fill: false,
+					lineTension: 0
+				}]
+			},
+			options: {
+				responsive: true,
+				title: {
+					display: true,
+					text: 'Quaternion to Euler Conversion'
+				},
+				tooltips: {
+					mode: 'index'
+				},
+				scales: {
+					xAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true
+						}
+					}],
+					yAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Value'
+						},
+						ticks: {
+							suggestedMin: -10,
+							suggestedMax: 200,
+						}
+					}]
+				}
+			}
+		};
+		window.onload = function() {
+
+			var ctx = document.getElementById('canvas').getContext('2d');
+			window.myLine = new Chart(ctx, config);
+
+		};
+/*
+		document.getElementById('randomizeData').addEventListener('click', function() {
+			window.myLine.update();
+		});
+*/
+	</script>
+
+	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<!--  	<script src='app1.js'></script>	-->
+
+</body>
+
+</html>
+
