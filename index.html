@@ -33,45 +33,49 @@
 	</div>
 	<div style="display: block;">
 		<div id="textAngle1"></div>
-		<input style="display: inline-block; position: relative; top: 5px;" type="range" id="angle" name="angle" min="0" max="11" >
+		<input style="display: inline-block; position: relative; top: 5px;" type="range" id="angle" name="angle" min="0" max="360" >
 		<div id="textAngle2"></div>
 	</div>
 
 	<div style="display: block; margin-top: 10px;">
 		<div id="textxAxis1"></div>
-		<input style="display: inline-block; position: relative; top: 5px;" type="range" id="xAxis" name="xAxis" min="0" max="11" >
+		<input style="display: inline-block; position: relative; top: 5px;" type="range" id="xAxis" name="xAxis" min="0" max="360" >
 		<div id="textxAxis2"></div>
 	</div>
 
 	<div style="display: block; margin-top: 10px;">
 		<div id="textyAxis1"></div>
-		<input style="display: inline-block; position: relative; top: 5px;" type="range" id="yAxis" name="yAxis" min="0" max="11" >
+		<input style="display: inline-block; position: relative; top: 5px;" type="range" id="yAxis" name="yAxis" min="0" max="360" >
 		<div id="textyAxis2"></div>
 	</div>
 
 	<div style="display: block; margin-top: 10px; margin-bottom: 20px;">
 		<div id="textzAxis1"></div>
-		<input style="display: inline-block; position: relative; top: 5px;" type="range" id="zAxis" name="yAxis" min="0" max="11" >
+		<input style="display: inline-block; position: relative; top: 5px;" type="range" id="zAxis" name="yAxis" min="0" max="360" >
 		<div id="textzAxis2"></div>
 	</div>
-	<button id="Keep" style="display: block;">Keep</button>
+	<button id="Next" style="display: block;">Next</button>
 </div>
 
 <!--	<button id="randomizeData">Randomize Data</button>	-->
-	<div id="Instructions">
-<b>CONVERT QUATERNIONS TO EULER WITH A CSV FORMAT.<br>
-ie:</b><br>
-0.5 , 0.5 , 0.5 , 0 , <br>
-0.5 , 0 , 0 , 0 ,<br>
-0.5 , 1 , 0 , 0 ,<br>
--0.0194 , -0.02352 , -0.000186 , 0.999534 ,<br>
-0.5 , 0 , 0 , 1 ,<br>
--0.0194 , -0.02352 , -0.000186 , 0.599534 ,<br>
--0.0194 , -0.02352 , -0.000186 , 0.999534 ,<br>
--0.0194 , -0.02352 , -0.000186 , 0.999534 ,<br>
--0.0194 , -0.02352 , -0.000186 , 0.599534 ,<br>
--0.0194 , -0.02352 , -0.000186 , 0.599534 ,<br>
--0.0194 , -0.02352 , -0.000186 , 0.599534 , <br><br>
+<div id="Instructions">
+	<b>CONVERT QUATERNIONS TO EULER WITH A CSV FORMAT.<br>
+	<button id="displayInstruction" onclick="displayInstruction()">Show Example</button>
+	<div id="InstructionMessage">
+		ie:</b><br>
+		0.5 , 0.5 , 0.5 , 0 , <br>
+		0.5 , 0 , 0 , 0 ,<br>
+		0.5 , 1 , 0 , 0 ,<br>
+		-0.0194 , -0.02352 , -0.000186 , 0.999534 ,<br>
+		0.5 , 0 , 0 , 1 ,<br>
+		-0.0194 , -0.02352 , -0.000186 , 0.599534 ,<br>
+		-0.0194 , -0.02352 , -0.000186 , 0.999534 ,<br>
+		-0.0194 , -0.02352 , -0.000186 , 0.999534 ,<br>
+		-0.0194 , -0.02352 , -0.000186 , 0.599534 ,<br>
+		-0.0194 , -0.02352 , -0.000186 , 0.599534 ,<br>
+		-0.0194 , -0.02352 , -0.000186 , 0.599534 , <br><br>
+	</div>
+</div>
 	</div>
 	<div style="display: inline-block;">
 		<input type="file" name="filename" id="filename">
@@ -79,7 +83,7 @@ ie:</b><br>
 	</div>
 	<div style="display: inline-block;">
 		<textarea id="QuaternonListDivison" name="QuaternonListDivison" style="width: 500px; white-space: pre-wrap;"></textarea>
-		<button id="QuaternionListButton" style="display: block;">Use Quaternion List Above</button>
+		<button id="QuaternionListButton" style="display: block;">Process Quaternion List Above</button>
 	</div>
 	<div>
 		<div style="background-color: grey; margin-top: 10px;" id="csvQuat"></div>
@@ -104,6 +108,19 @@ ie:</b><br>
 		var maximumE = 200;
 		
 		var labelString = [ 0 , 1 , 2 ];
+		var showInstructionFlag = 0;
+
+function displayInstruction(){
+	showInstructionFlag = !showInstructionFlag;
+	if( showInstructionFlag )  {
+		document.getElementById('InstructionMessage').style.display = "block";
+		document.getElementById('displayInstruction').innerHTML = "Hide Example";
+		
+	} else {
+		document.getElementById('InstructionMessage').style.display = "none";
+		document.getElementById('displayInstruction').innerHTML = "Show Example";
+	}
+}
 
 function make_float4( w , x , y , z ){
    return [ w , x , y , z];
@@ -169,30 +186,13 @@ function rotationAxisToNormalizedQuaternion( axis , angle ) {
     return normalize(q);
 }
 
-function toEuler( w , x , y , z ) {
-
-	heading = Math.atan( ( 2*qy*qw-2*qx*qz ) / ( 1 - 2*qy*qy - 2*qz*qz ) );
-
-	test = qx*qy + qz*qw;
-
-	attitude = Math.asin(2*test);
-	bank = Math.atan( ( 2*qx*qw-2*qy*qz ) / ( 1 - 2*qx*qx - 2*qz*qz ) );
-
-
-	if (test > 0.499) { // singularity at north pole
-		heading = 2 * Math.atan(qx/qw);
-		attitude = 3.14/2;
-		bank = 0;
-	}
-	if (test < -0.499) { // singularity at south pole
-		heading = -2 * Math.atan(qx/qw);
-		attitude = - 3.14/2;
-		bank = 0;
-	}
+function refresh_HTML_Fields ( qw , qx , qy , qz , headings , attitude , bank ) {
 	console.log( qw + " , " + qx + " , " + qy + " , " + qz );
+/*
 	heading=heading*360/6.28;
 	attitude=attitude*360/6.28;
 	bank=bank*360/6.28
+*/
 	console.log( heading + " , " + attitude + " , " + bank );
 
 	document.getElementById("csvQuat").innerHTML = document.getElementById("csvQuat").innerHTML +  qw + " , " + qx + " , " + qy + " , " + qz + " , <br>";
@@ -223,6 +223,31 @@ function toEuler( w , x , y , z ) {
 	console.log(datapoints1);
 	console.log(datapoints2);
 	console.log(datapoints3);
+
+}
+
+function toEuler( w , x , y , z ) {
+
+	heading = Math.atan( ( 2*qy*qw-2*qx*qz ) / ( 1 - 2*qy*qy - 2*qz*qz ) );
+
+	test = qx*qy + qz*qw;
+
+	attitude = Math.asin(2*test);
+	bank = Math.atan( ( 2*qx*qw-2*qy*qz ) / ( 1 - 2*qx*qx - 2*qz*qz ) );
+
+
+	if (test > 0.499) { // singularity at north pole
+		heading = 2 * Math.atan(qx/qw);
+		attitude = 3.14/2;
+		bank = 0;
+	}
+	if (test < -0.499) { // singularity at south pole
+		heading = -2 * Math.atan(qx/qw);
+		attitude = - 3.14/2;
+		bank = 0;
+	}
+
+	refresh_HTML_Fields ( qw , qx , qy , qz , headings , attitude , bank );
 
 }
 function Quaternion_rotate( q, v )
@@ -275,6 +300,7 @@ var MakeRot = 0;
 var xv, yv, zv;
 var qPos , vPos;
 function refresh() {
+	var conversion = 6.28 / 360;
 	document.getElementById("textAngle1").innerHTML = "Angle: " + document.getElementById("angle").value;
 	document.getElementById("textAngle2").innerHTML = "Angle: " + document.getElementById("angle").value;
 	document.getElementById("textxAxis1").innerHTML = "X-Rot: " + document.getElementById("xAxis").value;
@@ -305,11 +331,11 @@ function refresh() {
 			Quatpoints4.push(0);
 		}
 		MakeRot = 1;
-		var angle = document.getElementById("angle").value;
+		var angle = document.getElementById("angle").value * conversion;
 
-		xa = document.getElementById("xAxis").value;
-		ya = document.getElementById("yAxis").value;
-		za = document.getElementById("zAxis").value;
+		xa = document.getElementById("xAxis").value * conversion;
+		ya = document.getElementById("yAxis").value * conversion;
+		za = document.getElementById("zAxis").value * conversion;
 
 		var axis = [ xa , ya , za ];
 		var q = rotationAxisToNormalizedQuaternion( axis , angle );
@@ -319,7 +345,8 @@ function refresh() {
 		datapoints2[datapoints2.length-1] = vFinal[1];
 		datapoints3[datapoints3.length-1] = vFinal[2];
 
-		qFinal = ToQuaternion(vFinal);
+		var tempVec = [ vFinal[0] * conversion , vFinal[1] * conversion , vFinal[2] * conversion ];
+		qFinal = ToQuaternion( tempVec );
 		Quatpoints1[Quatpoints1.length-1] = qFinal[0];
 		Quatpoints2[Quatpoints2.length-1] = qFinal[1];
 		Quatpoints3[Quatpoints3.length-1] = qFinal[2];
@@ -340,7 +367,7 @@ function refresh() {
 setInterval(refresh , 10);
 
 		$(document).ready(function(){
-			$('#Keep').click(function(){
+			$('#Next').click(function(){
 				MakeRot = 0;
 			});
 			$('#upload').click(function(){
@@ -626,7 +653,7 @@ setInterval(refresh , 10);
 	#EulerCanvas { display: inline-block; width: 45%; }
 	#csvQuat { display: inline-block; width: 45%; font-size: 1.2vw; }
 	#csv { display: inline-block; width: 45%; font-size: 1.2vw; }
-	#rotationController { display: block; width: 285px; margin-bottom: 20px; }
+	#rotationController { display: block; width: 300px; margin-bottom: 20px; background-color: cyan; }
 	#Instructions { display: block; }
 	#textAngle1 { display: none; }
 	#textAngle2 { display: inline-block; }
@@ -636,8 +663,11 @@ setInterval(refresh , 10);
 	#textyAxis2 { display: inline-block; }
 	#textzAxis1 { display: none; }
 	#textzAxis2 { display: inline-block; }
+	#InstructionMessage { display: none; }
+
 	@media only screen and (min-width: 1000px) {
 		#rotationController { display: block; float: right; }
+		#rotationController .input { float: right; }
 		#textAngle1 { display: inline-block; }
 		#textAngle2 { display: none; }
 		#textxAxis1 { display: inline-block; }
@@ -660,4 +690,3 @@ setInterval(refresh , 10);
 </body>
 
 </html>
-
