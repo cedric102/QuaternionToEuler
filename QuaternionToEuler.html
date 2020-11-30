@@ -191,14 +191,26 @@ function refresh_HTML_Fields ( qw , qx , qy , qz , heading , attitude , bank ) {
 
 	console.log( qw + " , " + qx + " , " + qy + " , " + qz );
 
-	heading=heading*360/6.28;
-	attitude=attitude*360/6.28;
-	bank=bank*360/6.28
+	var tempVec = [ heading , attitude , bank ];
+	tempVec = normalizeVec( tempVec );
+
+	var tempQuat = [ qw , qx , qy , qz ];
+	tempQuat = normalize( tempQuat );
+	qw = tempQuat[0];
+	qx = tempQuat[1];
+	qy = tempQuat[2];
+	qz = tempQuat[3];
+
+	heading = tempVec[0] * 180;
+	attitude = tempVec[1] * 180;
+	bank = tempVec[2] * 180;
 
 	console.log( heading + " , " + attitude + " , " + bank );
 
-	document.getElementById("csvQuat").innerHTML = document.getElementById("csvQuat").innerHTML +  qw + " , " + qx + " , " + qy + " , " + qz + " , <br>";
-	document.getElementById("csv").innerHTML = document.getElementById("csv").innerHTML +  heading + " , " + attitude + " , " + bank + " , <br>";
+	var csvQuatVar = document.getElementById("csvQuat");
+	var csvVar = document.getElementById("csv");
+	csvQuatVar.innerHTML += qw.toPrecision(5) + " , " + qx.toPrecision(5) + " , " + qy.toPrecision(5) + " , " + qz.toPrecision(5) + " , <br>";
+	csvVar.innerHTML += heading.toPrecision(5) + " , " + attitude.toPrecision(5) + " , " + bank.toPrecision(5) + " , <br>";
 
 	datapoints1.push(heading);
 	datapoints2.push(attitude);
@@ -253,6 +265,7 @@ function toEuler( w , x , y , z ) {
 	refresh_HTML_Fields ( qw , qx , qy , qz , heading , attitude , bank );
 
 }
+
 function Quaternion_rotate( q, v )
 {
 
@@ -318,7 +331,7 @@ function refresh() {
 	    prevY != document.getElementById("yAxis").value  ||
 	    prevZ != document.getElementById("zAxis").value    ) {
 		if( MakeRot === 0 ) {
-			labelString.push(0);
+			labelString.push(labelString[labelString.length - 1] + 1);
 			xv = datapoints1[datapoints1.length-1];
 			yv = datapoints2[datapoints2.length-1];
 			zv = datapoints3[datapoints3.length-1];
@@ -374,14 +387,7 @@ setInterval(refresh , 10);
 				MakeRot = 0;
 			});
 			$('#upload').click(function(){
-/*
-				var angle = 1.5;
-				var v = [ 1 , 0 , 0 ];
-				var axis = [ 0 , 0 , 1 ];
-				var q = rotationAxisToNormalizedQuaternion( axis , angle );
-				var vec = Quaternion_rotate( q, v );
-				console.log( ToQuaternion( vec ) );
-*/
+
 				while (datapoints1.length) { datapoints1.pop(); }
 				while (datapoints2.length) { datapoints2.pop(); }
 				while (datapoints3.length) { datapoints3.pop(); }
@@ -429,7 +435,13 @@ setInterval(refresh , 10);
 							qy = cols[2];
 							qz = cols[3];
 
-							toEuler( qw , qx , qy , qz );
+							var qGlobal = [ qw , qx , qy , qz ];
+						//	console.log( "START !!!" );
+							console.log( "START : " + qGlobal );
+							var qGlobal = normalize( qGlobal );
+							console.log( "NEXT : " + qGlobal );
+
+							toEuler( qGlobal[0] , qGlobal[1] , qGlobal[2] , qGlobal[3] );
 
 						}
 						while (labelString.length) { labelString.pop(); }
@@ -492,7 +504,11 @@ setInterval(refresh , 10);
 					qy = innermatrixCSV[2];
 					qz = innermatrixCSV[3];
 
-					toEuler( qw , qx , qy , qz );
+					var qGlobal = [ qw , qx , qy , qz ];
+					var qGlobal = normalize( qGlobal );
+
+					toEuler( qGlobal[0] , qGlobal[1] , qGlobal[2] , qGlobal[3] );
+
 				}
 				while (labelString.length) { labelString.pop(); }
 				if( datapoints1.length < 2 ) {
