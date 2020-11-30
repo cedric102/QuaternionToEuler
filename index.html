@@ -76,6 +76,7 @@
 		-0.0194 , -0.02352 , -0.000186 , 0.599534 , <br><br>
 	</div>
 </div>
+
 	</div>
 	<div style="display: inline-block;">
 		<input type="file" name="filename" id="filename">
@@ -186,17 +187,19 @@ function rotationAxisToNormalizedQuaternion( axis , angle ) {
     return normalize(q);
 }
 
-function refresh_HTML_Fields ( qw , qx , qy , qz , headings , attitude , bank ) {
+function refresh_HTML_Fields ( qw , qx , qy , qz , heading , attitude , bank ) {
+
 	console.log( qw + " , " + qx + " , " + qy + " , " + qz );
-/*
+
 	heading=heading*360/6.28;
 	attitude=attitude*360/6.28;
 	bank=bank*360/6.28
-*/
+
 	console.log( heading + " , " + attitude + " , " + bank );
 
 	document.getElementById("csvQuat").innerHTML = document.getElementById("csvQuat").innerHTML +  qw + " , " + qx + " , " + qy + " , " + qz + " , <br>";
 	document.getElementById("csv").innerHTML = document.getElementById("csv").innerHTML +  heading + " , " + attitude + " , " + bank + " , <br>";
+
 	datapoints1.push(heading);
 	datapoints2.push(attitude);
 	datapoints3.push(bank);
@@ -247,7 +250,7 @@ function toEuler( w , x , y , z ) {
 		bank = 0;
 	}
 
-	refresh_HTML_Fields ( qw , qx , qy , qz , headings , attitude , bank );
+	refresh_HTML_Fields ( qw , qx , qy , qz , heading , attitude , bank );
 
 }
 function Quaternion_rotate( q, v )
@@ -420,7 +423,6 @@ setInterval(refresh , 10);
 	 							/*the value of the current column.       								Do whatever you want with the value*/
 								console.log( cols[j] );
 							}
-//							document.getElementById("csv").innerHTML = document.getElementById("csv").innerHTML + "<br>" +  cols;
 
 							qw = cols[0];
 							qx = cols[1];
@@ -435,6 +437,12 @@ setInterval(refresh , 10);
 							datapoints1.push(datapoints1[datapoints1.length-1]);
 							datapoints2.push(datapoints2[datapoints2.length-1]);
 							datapoints3.push(datapoints3[datapoints3.length-1]);
+
+							Quatpoints1.push(Quatpoints1[Quatpoints1.length-1]);
+							Quatpoints2.push(Quatpoints2[Quatpoints2.length-1]);
+							Quatpoints3.push(Quatpoints3[Quatpoints3.length-1]);
+							Quatpoints4.push(Quatpoints4[Quatpoints4.length-1]);
+
 							labelString.push(0);
 							labelString.push(1);
 						} else
@@ -470,6 +478,7 @@ setInterval(refresh , 10);
 //				document.getElementById("csv").innerHTML = document.getElementById("QuaternonListDivison").value;
 				var tempVal = document.getElementById("QuaternonListDivison").value;
 				tempVal = tempVal.replace(/\n/g, '<br>\n');
+
 				var matrixCSV = tempVal.split("<br>\n");
 				for( var matrixLoop = 0 ; matrixLoop < matrixCSV.length ; matrixLoop++ ) {
 					var innermatrixCSV = matrixCSV[matrixLoop].split(",");
@@ -490,10 +499,12 @@ setInterval(refresh , 10);
 					datapoints1.push(datapoints1[datapoints1.length-1]);
 					datapoints2.push(datapoints2[datapoints2.length-1]);
 					datapoints3.push(datapoints3[datapoints3.length-1]);
+
 					Quatpoints1.push(Quatpoints1[Quatpoints1.length-1]);
 					Quatpoints2.push(Quatpoints2[Quatpoints2.length-1]);
 					Quatpoints3.push(Quatpoints3[Quatpoints3.length-1]);
 					Quatpoints4.push(Quatpoints4[Quatpoints4.length-1]);
+
 					labelString.push(0);
 					labelString.push(1);
 				} else
@@ -651,9 +662,9 @@ setInterval(refresh , 10);
 
 	#QuatCanvas { display: inline-block; width: 45%; }
 	#EulerCanvas { display: inline-block; width: 45%; }
-	#csvQuat { display: inline-block; width: 45%; font-size: 1.2vw; }
-	#csv { display: inline-block; width: 45%; font-size: 1.2vw; }
-	#rotationController { display: block; width: 300px; margin-bottom: 20px; background-color: cyan; }
+	#rotationController { display: block; width: 300px; margin-bottom: 20px; }
+	#csvQuat { display: inline-block; width: 49%; font-size: 1.3vw; }
+	#csv { display: inline-block; width: 49%; font-size: 1.3vw; }
 	#Instructions { display: block; }
 	#textAngle1 { display: none; }
 	#textAngle2 { display: inline-block; }
@@ -666,6 +677,8 @@ setInterval(refresh , 10);
 	#InstructionMessage { display: none; }
 
 	@media only screen and (min-width: 1000px) {
+		#csvQuat { display: inline-block; width: 34%; font-size: 0.9vw; }
+		#csv { display: inline-block; width: 34%; font-size: 0.9vw; }
 		#rotationController { display: block; float: right; }
 		#rotationController .input { float: right; }
 		#textAngle1 { display: inline-block; }
@@ -681,6 +694,10 @@ setInterval(refresh , 10);
 		#Instructions { font-size: 2.5vw; }
 		#QuatCanvas { display: block; width: 90%; }
 		#EulerCanvas { display: block; width: 90%; }
+		#csvQuat { display: block; width: 49%; font-size: 2.5vw; }
+		#csv { display: block; width: 49%; font-size: 2.5vw; }
+	}
+	@media only screen and (max-width: 800px) {
 		#csvQuat { display: block; width: 99%; font-size: 2.5vw; }
 		#csv { display: block; width: 99%; font-size: 2.5vw; }
 	}
